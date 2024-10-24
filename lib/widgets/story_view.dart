@@ -18,6 +18,8 @@ enum IndicatorHeight { small, medium, large }
 
 /// This is a representation of a story item (or page).
 class StoryItem {
+  final int id;
+
   /// Specifies how long the page should be displayed. It should be a reasonable
   /// amount of time greater than 0 milliseconds.
   final Duration duration;
@@ -36,6 +38,7 @@ class StoryItem {
   final Widget view;
   StoryItem(
     this.view, {
+    required this.id,
     required this.duration,
     this.shown = false,
   });
@@ -49,6 +52,7 @@ class StoryItem {
   /// Works for inline and full-page stories. See [StoryView.inline] for more on
   /// what inline/full-page means.
   static StoryItem text({
+    required int id,
     required String title,
     required Color backgroundColor,
     Key? key,
@@ -79,10 +83,11 @@ class StoryItem {
             bottom: Radius.circular(roundedBottom ? 8 : 0),
           ),
         ),
-        padding: textOuterPadding?? EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 16,
-        ),
+        padding: textOuterPadding ??
+            EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 16,
+            ),
         child: Center(
           child: Text(
             title,
@@ -98,6 +103,7 @@ class StoryItem {
         ),
         //color: backgroundColor,
       ),
+      id: id,
       shown: shown,
       duration: duration ?? Duration(seconds: 3),
     );
@@ -106,6 +112,7 @@ class StoryItem {
   /// Factory constructor for page images. [controller] should be same instance as
   /// one passed to the `StoryView`
   factory StoryItem.pageImage({
+    required int id,
     required String url,
     required StoryController controller,
     Key? key,
@@ -140,18 +147,20 @@ class StoryItem {
                   margin: EdgeInsets.only(
                     bottom: 24,
                   ),
-                  padding: captionOuterPadding?? EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 8,
-                  ),
+                  padding: captionOuterPadding ??
+                      EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 8,
+                      ),
                   color: caption != null ? Colors.black54 : Colors.transparent,
-                  child: caption?? const SizedBox.shrink(),
+                  child: caption ?? const SizedBox.shrink(),
                 ),
               ),
             )
           ],
         ),
       ),
+      id: id,
       shown: shown,
       duration: duration ?? Duration(seconds: 3),
     );
@@ -160,6 +169,7 @@ class StoryItem {
   /// Shorthand for creating inline image. [controller] should be same instance as
   /// one passed to the `StoryView`
   factory StoryItem.inlineImage({
+    required int id,
     required String url,
     Text? caption,
     required StoryController controller,
@@ -193,11 +203,12 @@ class StoryItem {
                 ),
                 Container(
                   margin: EdgeInsets.only(bottom: 16),
-                  padding: captionOuterPadding?? EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding: captionOuterPadding ??
+                      EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   child: Align(
                     alignment: Alignment.bottomLeft,
                     child: Container(
-                      child: caption?? const SizedBox.shrink(),
+                      child: caption ?? const SizedBox.shrink(),
                       width: double.infinity,
                     ),
                   ),
@@ -211,6 +222,7 @@ class StoryItem {
           bottom: Radius.circular(roundedBottom ? 8 : 0),
         ),
       ),
+      id: id,
       shown: shown,
       duration: duration ?? Duration(seconds: 3),
     );
@@ -220,6 +232,7 @@ class StoryItem {
   /// one passed to the `StoryView`
   factory StoryItem.pageVideo(
     String url, {
+    required int id,
     required StoryController controller,
     Key? key,
     Duration? duration,
@@ -252,13 +265,14 @@ class StoryItem {
                     padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                     color:
                         caption != null ? Colors.black54 : Colors.transparent,
-                    child: caption?? const SizedBox.shrink(),
+                    child: caption ?? const SizedBox.shrink(),
                   ),
                 ),
               )
             ],
           ),
         ),
+        id: id,
         shown: shown,
         duration: duration ?? Duration(seconds: 10));
   }
@@ -268,6 +282,7 @@ class StoryItem {
   /// up.
   factory StoryItem.pageProviderImage(
     ImageProvider image, {
+    required int id,
     Key? key,
     BoxFit imageFit = BoxFit.fitWidth,
     String? caption,
@@ -318,6 +333,7 @@ class StoryItem {
             ],
           ),
         ),
+        id: id,
         shown: shown,
         duration: duration ?? Duration(seconds: 3));
   }
@@ -327,6 +343,7 @@ class StoryItem {
   /// up.
   factory StoryItem.inlineProviderImage(
     ImageProvider image, {
+    required int id,
     Key? key,
     Text? caption,
     bool shown = false,
@@ -364,6 +381,7 @@ class StoryItem {
           ),
         ),
       ),
+      id: id,
       shown: shown,
       duration: duration ?? Duration(seconds: 3),
     );
@@ -406,6 +424,7 @@ class StoryView extends StatefulWidget {
 
   /// Indicator Color
   final Color? indicatorColor;
+
   /// Indicator Foreground Color
   final Color? indicatorForegroundColor;
 
@@ -427,7 +446,10 @@ class StoryView extends StatefulWidget {
     this.indicatorColor,
     this.indicatorForegroundColor,
     this.indicatorHeight = IndicatorHeight.large,
-    this.indicatorOuterPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8,),
+    this.indicatorOuterPadding = const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 8,
+    ),
   });
 
   @override
@@ -796,8 +818,11 @@ class PageBarState extends State<PageBar> {
                 right: widget.pages.last == it ? 0 : this.spacing),
             child: StoryProgressIndicator(
               isPlaying(it) ? widget.animation!.value : (it.shown ? 1 : 0),
-              indicatorHeight:
-                  widget.indicatorHeight == IndicatorHeight.large ? 5 : widget.indicatorHeight == IndicatorHeight.medium ? 3 : 2,
+              indicatorHeight: widget.indicatorHeight == IndicatorHeight.large
+                  ? 5
+                  : widget.indicatorHeight == IndicatorHeight.medium
+                      ? 3
+                      : 2,
               indicatorColor: widget.indicatorColor,
               indicatorForegroundColor: widget.indicatorForegroundColor,
             ),
@@ -831,11 +856,11 @@ class StoryProgressIndicator extends StatelessWidget {
         this.indicatorHeight,
       ),
       foregroundPainter: IndicatorOval(
-        this.indicatorForegroundColor?? Colors.white.withOpacity(0.8),
+        this.indicatorForegroundColor ?? Colors.white.withOpacity(0.8),
         this.value,
       ),
       painter: IndicatorOval(
-        this.indicatorColor?? Colors.white.withOpacity(0.4),
+        this.indicatorColor ?? Colors.white.withOpacity(0.4),
         1.0,
       ),
     );
